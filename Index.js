@@ -34,6 +34,29 @@ async function run() {
        const db = client.db("jobPortalMERN");
        const jobsCollection = db.collection("mernjobs");
 
+app.post("/login", async (req, res) => {
+      const sql = "SELECT * FROM login WHERE email = ? AND password = ?";
+      db.query(sql, [req.body.email, req.body.password], (err, data) => {
+        if(err) return res.json("Login Failed");
+        if(data.length > 0){
+          return res.json("Login Successfully");
+        }else{
+          return res.json("No Record");
+        }
+      })
+    })
+
+    app.post('/signup', async (req, res) => {
+      const {name, email, password} = req.body;
+      const existingUser = await jobsCollection.findOne({email});
+      if(existingUser){
+        return res.status(400).send({message: "User already exists"});
+      }else{
+        const result = await jobsCollection.insertOne({name, email, password});
+        res.status(201).send(result);
+      }
+    })
+
     //    post job
     app.post('/post-job', async (req, res) => {
         const body = req.body;
